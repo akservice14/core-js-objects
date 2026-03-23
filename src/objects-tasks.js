@@ -348,33 +348,127 @@ function group(array, keySelector, valueSelector) {
  *  For more examples see unit tests.
  */
 
+const SelectorPart = Object.freeze({
+  EMPTY: 0,
+  ELEMENT: 1,
+  ID: 2,
+  CLASS: 3,
+  ATTR: 4,
+  PSEUDO_CLASS: 5,
+  PSEUDO_ELEMENT: 6,
+});
+
+class CssSelectorBuilderClass {
+  constructor() {
+    this.result = '';
+    this.previousMethod = SelectorPart.EMPTY;
+    this.nonUniqueErr =
+      'Element, id and pseudo-element should not occur more than one time inside the selector';
+    this.wringOrderErr =
+      'Selector parts should be arranged in the following order: element, id, class, attribute, pseudo-class, pseudo-element';
+  }
+
+  element(value) {
+    if (this.previousMethod === SelectorPart.ELEMENT)
+      throw new Error(this.nonUniqueErr);
+    else if (this.previousMethod > SelectorPart.ELEMENT)
+      throw new Error(this.wringOrderErr);
+    this.previousMethod = SelectorPart.ELEMENT;
+    this.result += value;
+    return this;
+  }
+
+  id(value) {
+    if (this.previousMethod === SelectorPart.ID)
+      throw new Error(this.nonUniqueErr);
+    else if (this.previousMethod > SelectorPart.ID)
+      throw new Error(this.wringOrderErr);
+    this.previousMethod = SelectorPart.ID;
+    this.result += `#${value}`;
+    return this;
+  }
+
+  class(value) {
+    if (this.previousMethod > SelectorPart.CLASS)
+      throw new Error(this.wringOrderErr);
+    this.previousMethod = SelectorPart.CLASS;
+    this.result += `.${value}`;
+    return this;
+  }
+
+  attr(value) {
+    if (this.previousMethod > SelectorPart.ATTR)
+      throw new Error(this.wringOrderErr);
+    this.previousMethod = SelectorPart.ATTR;
+    this.result += `[${value}]`;
+    return this;
+  }
+
+  pseudoClass(value) {
+    if (this.previousMethod > SelectorPart.PSEUDO_CLASS)
+      throw new Error(this.wringOrderErr);
+    this.previousMethod = SelectorPart.PSEUDO_CLASS;
+    this.result += `:${value}`;
+    return this;
+  }
+
+  pseudoElement(value) {
+    if (this.previousMethod === SelectorPart.PSEUDO_ELEMENT)
+      throw new Error(this.nonUniqueErr);
+    else if (this.previousMethod > SelectorPart.PSEUDO_ELEMENT)
+      throw new Error(this.wringOrderErr);
+    this.previousMethod = SelectorPart.PSEUDO_ELEMENT;
+    this.result += `::${value}`;
+    return this;
+  }
+
+  combine(selector1, combinator, selector2) {
+    this.result = `${selector1.stringify()} ${combinator} ${selector2.stringify()}`;
+    const newObject = new CssSelectorBuilderClass();
+    newObject.setResult(this.result);
+    return newObject;
+  }
+
+  setResult(value) {
+    this.result = value;
+  }
+
+  stringify() {
+    return this.result;
+  }
+}
+
 const cssSelectorBuilder = {
-  element(/* value */) {
-    throw new Error('Not implemented');
+  element(value) {
+    return new CssSelectorBuilderClass().element(value);
   },
 
-  id(/* value */) {
-    throw new Error('Not implemented');
+  id(value) {
+    return new CssSelectorBuilderClass().id(value);
   },
 
-  class(/* value */) {
-    throw new Error('Not implemented');
+  class(value) {
+    return new CssSelectorBuilderClass().class(value);
   },
 
-  attr(/* value */) {
-    throw new Error('Not implemented');
+  attr(value) {
+    return new CssSelectorBuilderClass().attr(value);
   },
 
-  pseudoClass(/* value */) {
-    throw new Error('Not implemented');
+  pseudoClass(value) {
+    return new CssSelectorBuilderClass().pseudoClass(value);
   },
 
-  pseudoElement(/* value */) {
-    throw new Error('Not implemented');
+  pseudoElement(value) {
+    return new CssSelectorBuilderClass().pseudoElement(value);
   },
 
-  combine(/* selector1, combinator, selector2 */) {
-    throw new Error('Not implemented');
+  combine(selector1, combinator, selector2) {
+    return new CssSelectorBuilderClass().combine(
+      selector1,
+      combinator,
+      selector2
+    );
   },
 };
 
