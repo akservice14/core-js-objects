@@ -133,6 +133,7 @@ function makeWord(/* lettersObject */) {
  *    sellTickets([25, 100]) => false (The seller does not have enough money to give change.)
  */
 function sellTickets(/* queue */) {
+  // comment
   throw new Error('Not implemented');
 }
 
